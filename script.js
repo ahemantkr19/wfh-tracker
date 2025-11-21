@@ -1,8 +1,8 @@
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
-let selectedYear = new Date().getFullYear();
 let currentUser = '';
 let userData = {};
+let hasUnsavedChanges = false;
 
 const GITHUB_REPO = 'ahemantkr19/wfh-tracker';
 const GITHUB_TOKEN = localStorage.getItem('github_token') || '';
@@ -24,99 +24,52 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userDisplay').textContent = sessionData.fullName;
     
     loadData();
-    renderCalendar();
-    updateYearDisplay();
     
     // Event listeners
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
     document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
-    document.getElementById('prevYear').addEventListener('click', () => changeYear(-1));
-    document.getElementById('nextYear').addEventListener('click', () => changeYear(1));
+    document.getElementById('saveBtn').addEventListener('click', handleSave);
 });
 
 function handleLogout() {
+    if (hasUnsavedChanges) {
+        if (!confirm('You have unsaved changes. Are you sure you want to logout?')) {
+            return;
+        }
+    }
     sessionStorage.removeItem('wfh_session');
     window.location.href = 'login.html';
 }
 
-function changeYear(delta) {
-    selectedYear += delta;
-    updateYearDisplay();
-    loadData();
-}
-
-function updateYearDisplay() {
-    document.getElementById('selectedYear').textContent = selectedYear;
+function handleSave() {
+    saveData();
+    hasUnsavedChanges = false;
+    const saveMessage = document.getElementById('saveMessage');
+    saveMessage.textContent = '✓ Changes saved successfully!';
+    saveMessage.style.color = '#86efac';
+    setTimeout(() => {
+        saveMessage.textContent = '';
+    }, 3000);
 }
 
 async function loadData() {
-    // Load data for all years but display only selected year
-    try {
-        const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${DATA_FILE_PATH}?t=${Date.now()}`);
-        if (response.ok) {
-            const data = await response.json();
-            userData = data;
-            localStorage.setItem('workLocationData', JSON.stringify(userData));
-        }
-    } catch (error) {
-        console.log('Loading from local storage');
-        const stored = localStorage.getItem('workLocationData');
-        userData = stored ? JSON.parse(stored) : {};
-    }
+    // Load data from localStorage for current user
+    const stored = localStorage.getItem('workLocationData');
+    userData = stored ? JSON.parse(stored) : {};
     
     // Initialize user data structure if needed
     if (!userData[currentUser]) {
         userData[currentUser] = {};
     }
-    if (!userData[currentUser][selectedYear]) {
-        userData[currentUser][selectedYear] = {};
-    }
     
     renderCalendar();
-    renderTeamView();
 }
 
 async function saveData() {
-    // Save to local storage immediately
+    // Save to local storage
     localStorage.setItem('workLocationData', JSON.stringify(userData));
-    
-    // Try to sync with GitHub (requires token)
-    if (GITHUB_TOKEN) {
-        try {
-            // Get current file SHA
-            const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`, {
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-            
-            let sha = '';
-            if (getResponse.ok) {
-                const fileData = await getResponse.json();
-                sha = fileData.sha;
-            }
-            
-            // Update or create file
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(userData, null, 2))));
-            await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: `Update team data - ${new Date().toISOString()}`,
-                    content: content,
-                    sha: sha
-                })
-            });
-        } catch (error) {
-            console.log('GitHub sync failed, data saved locally');
-        }
-    }
+    console.log('Data saved successfully');
 }
 
 function changeMonth(delta) {
@@ -184,19 +137,27 @@ function createDayElement(dayNumber, otherMonth = false, isToday = false) {
     const day = document.createElement('div');
     day.className = 'calendar-day';
     
+    // Calculate day of week (0 = Sunday, 6 = Saturday)
+    const date = new Date(currentYear, currentMonth, dayNumber);
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+    
     if (otherMonth) {
         day.classList.add('other-month');
+    }
+    
+    if (isWeekend && !otherMonth) {
+        day.classList.add('weekend');
     }
     
     if (isToday && !otherMonth) {
         day.classList.add('today');
     }
     
-    const dateKey = `${selectedYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
     
-    if (!otherMonth && currentUser && userData[currentUser] && 
-        userData[currentUser][selectedYear] && userData[currentUser][selectedYear][dateKey]) {
-        const status = userData[currentUser][selectedYear][dateKey];
+    if (!otherMonth && currentUser && userData[currentUser] && userData[currentUser][dateKey]) {
+        const status = userData[currentUser][dateKey];
         day.classList.add(status);
         
         const dateNum = document.createElement('div');
@@ -228,7 +189,7 @@ function createDayElement(dayNumber, otherMonth = false, isToday = false) {
         }
     }
     
-    if (!otherMonth) {
+    if (!otherMonth && !isWeekend) {
         day.addEventListener('click', () => selectStatus(dateKey, day));
     }
     
@@ -241,64 +202,20 @@ function selectStatus(dateKey, dayElement) {
     }
     
     const statuses = ['office', 'remote', 'off', null];
-    const currentStatus = userData[currentUser]?.[selectedYear]?.[dateKey];
+    const currentStatus = userData[currentUser]?.[dateKey];
     const currentIndex = statuses.indexOf(currentStatus);
     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
     
     if (!userData[currentUser]) {
         userData[currentUser] = {};
     }
-    if (!userData[currentUser][selectedYear]) {
-        userData[currentUser][selectedYear] = {};
-    }
     
     if (nextStatus === null) {
-        delete userData[currentUser][selectedYear][dateKey];
+        delete userData[currentUser][dateKey];
     } else {
-        userData[currentUser][selectedYear][dateKey] = nextStatus;
+        userData[currentUser][dateKey] = nextStatus;
     }
     
-    saveData();
+    hasUnsavedChanges = true;
     renderCalendar();
-    renderTeamView();
-}
-
-function renderTeamView() {
-    const teamList = document.getElementById('teamList');
-    teamList.innerHTML = '';
-    
-    const today = new Date();
-    const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    
-    // Get list of users from user database
-    const usersDb = localStorage.getItem('wfh_users');
-    const allUsers = usersDb ? JSON.parse(usersDb) : {};
-    
-    Object.keys(allUsers).sort().forEach(email => {
-        const member = document.createElement('div');
-        member.className = 'team-member';
-        
-        const name = document.createElement('div');
-        name.className = 'team-member-name';
-        name.textContent = allUsers[email].fullName;
-        
-        const status = document.createElement('div');
-        status.className = 'team-member-status';
-        
-        const todayYear = today.getFullYear();
-        const todayStatus = userData[email]?.[todayYear]?.[dateKey];
-        if (todayStatus) {
-            status.innerHTML = `Today: <span class="status-badge ${todayStatus}">${todayStatus}</span>`;
-        } else {
-            status.textContent = 'No status for today';
-        }
-        
-        member.appendChild(name);
-        member.appendChild(status);
-        teamList.appendChild(member);
-    });
-    
-    if (Object.keys(allUsers).length === 0) {
-        teamList.innerHTML = '<p style="text-align: center; color: #999;">No team members yet</p>';
-    }
 }
