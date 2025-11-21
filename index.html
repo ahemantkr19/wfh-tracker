@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Location Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📍 WFH Tracker</h1>
+            <div class="user-section">
+                <input type="text" id="username" placeholder="Enter your name" />
+                <button id="saveUser">Set User</button>
+            </div>
+        </header>
+
+        <div class="controls">
+            <button id="prevMonth">← Previous</button>
+            <h2 id="currentMonth"></h2>
+            <button id="nextMonth">Next →</button>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="status-badge office">Office</span> - Working from office
+            </div>
+            <div class="legend-item">
+                <span class="status-badge remote">Remote</span> - Working from home
+            </div>
+            <div class="legend-item">
+                <span class="status-badge off">Off</span> - Day off
+            </div>
+        </div>
+
+        <div id="calendar"></div>
+
+        <div class="team-view">
+            <h3>Team Status</h3>
+            <div id="teamList"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

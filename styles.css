@@ -1,0 +1,257 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.user-section {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.user-section input {
+    padding: 10px 15px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.user-section button, .controls button {
+    padding: 10px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.user-section button:hover, .controls button:hover {
+    background: #5568d3;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.controls h2 {
+    color: #333;
+    font-size: 24px;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.status-badge.office {
+    background: #4caf50;
+    color: white;
+}
+
+.status-badge.remote {
+    background: #2196f3;
+    color: white;
+}
+
+.status-badge.off {
+    background: #ff9800;
+    color: white;
+}
+
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.calendar-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    color: #333;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.calendar-day:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.calendar-day.other-month {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.calendar-day.today {
+    border-color: #667eea;
+    border-width: 3px;
+    font-weight: bold;
+}
+
+.calendar-day.office {
+    background: #e8f5e9;
+    border-color: #4caf50;
+}
+
+.calendar-day.remote {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.calendar-day.off {
+    background: #fff3e0;
+    border-color: #ff9800;
+}
+
+.date-number {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.date-status {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+.team-view {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.team-view h3 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#teamList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.team-member {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.team-member-name {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.team-member-status {
+    font-size: 13px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    #calendar {
+        gap: 5px;
+    }
+
+    .calendar-day {
+        padding: 5px;
+    }
+
+    .date-number {
+        font-size: 14px;
+    }
+
+    .date-status {
+        font-size: 9px;
+    }
+
+    .controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .legend {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
