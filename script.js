@@ -124,12 +124,17 @@ function renderCalendar() {
         calendar.appendChild(day);
     }
     
-    // Add next month's leading days
+    // Calculate how many cells we have after adding current month
     const totalCells = calendar.children.length - 7; // Subtract header row
-    const remainingCells = 42 - totalCells; // 6 rows * 7 days
-    for (let i = 1; i <= remainingCells; i++) {
-        const day = createDayElement(i, true);
-        calendar.appendChild(day);
+    const cellsInLastRow = totalCells % 7;
+    
+    // Only add next month's days if they're needed to complete the last row
+    if (cellsInLastRow > 0) {
+        const daysToAdd = 7 - cellsInLastRow;
+        for (let i = 1; i <= daysToAdd; i++) {
+            const day = createDayElement(i, true);
+            calendar.appendChild(day);
+        }
     }
 }
 
