@@ -13,11 +13,6 @@ function getUsers() {
     return users ? JSON.parse(users) : {};
 }
 
-// Save users to localStorage
-function saveUsers(users) {
-    localStorage.setItem('wfh_users', JSON.stringify(users));
-}
-
 // Show message
 function showMessage(text, type) {
     const messageEl = document.getElementById('message');
@@ -28,7 +23,7 @@ function showMessage(text, type) {
     }, 3000);
 }
 
-// Initialize
+// Initialize login page
 document.addEventListener('DOMContentLoaded', () => {
     // Check if already logged in
     const currentSession = sessionStorage.getItem('wfh_session');
@@ -37,59 +32,55 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
-    // Form switching
-    document.getElementById('showRegister').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('registerForm').style.display = 'block';
-    });
-    
-    document.getElementById('showLogin').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('registerForm').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
-    });
-    
-    // Login
+    // Login button handler
     document.getElementById('loginBtn').addEventListener('click', handleLogin);
-    document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+    
+    // Enter key on password field
+    document.getElementById('passwordInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleLogin();
     });
     
-    // Register
-    document.getElementById('registerBtn').addEventListener('click', handleRegister);
-    document.getElementById('registerConfirmPassword').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleRegister();
+    // Enter key on email field
+    document.getElementById('emailInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('passwordInput').focus();
+        }
     });
 });
 
 async function handleLogin() {
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('emailInput').value.trim().toLowerCase();
+    const password = document.getElementById('passwordInput').value;
     
-    if (!username || !password) {
-        showMessage('Please enter username and password', 'error');
+    if (!email || !password) {
+        showMessage('Please enter email and password', 'error');
+        return;
+    }
+    
+    // Validate email format
+    if (!email.includes('@')) {
+        showMessage('Please enter a valid email address', 'error');
         return;
     }
     
     const users = getUsers();
-    const user = users[username];
+    const user = users[email];
     
     if (!user) {
-        showMessage('Invalid username or password', 'error');
+        showMessage('Invalid email or password', 'error');
         return;
     }
     
     const hashedPassword = await hashPassword(password);
     
     if (user.password !== hashedPassword) {
-        showMessage('Invalid username or password', 'error');
+        showMessage('Invalid email or password', 'error');
         return;
     }
     
     // Create session
     const session = {
-        username: username,
+        email: email,
         fullName: user.fullName,
         loginTime: new Date().toISOString()
     };
@@ -100,62 +91,4 @@ async function handleLogin() {
     setTimeout(() => {
         window.location.href = 'index.html';
     }, 1000);
-}
-
-async function handleRegister() {
-    const username = document.getElementById('registerUsername').value.trim();
-    const fullName = document.getElementById('registerFullName').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const confirmPassword = document.getElementById('registerConfirmPassword').value;
-    
-    // Validation
-    if (!username || !fullName || !password || !confirmPassword) {
-        showMessage('Please fill in all fields', 'error');
-        return;
-    }
-    
-    if (username.length < 3) {
-        showMessage('Username must be at least 3 characters', 'error');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showMessage('Password must be at least 6 characters', 'error');
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        showMessage('Passwords do not match', 'error');
-        return;
-    }
-    
-    const users = getUsers();
-    
-    if (users[username]) {
-        showMessage('Username already exists', 'error');
-        return;
-    }
-    
-    // Hash password and save user
-    const hashedPassword = await hashPassword(password);
-    users[username] = {
-        fullName: fullName,
-        password: hashedPassword,
-        registeredAt: new Date().toISOString()
-    };
-    
-    saveUsers(users);
-    showMessage('Registration successful! Please login.', 'success');
-    
-    // Clear form and switch to login
-    document.getElementById('registerUsername').value = '';
-    document.getElementById('registerFullName').value = '';
-    document.getElementById('registerPassword').value = '';
-    document.getElementById('registerConfirmPassword').value = '';
-    
-    setTimeout(() => {
-        document.getElementById('registerForm').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('loginUsername').value = username;
-    }, 1500);
 }

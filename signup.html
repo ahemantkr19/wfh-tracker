@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - WFH Tracker</title>
+    <link rel="stylesheet" href="login-styles.css">
+</head>
+<body>
+    <div class="landing-page">
+        <div class="login-card">
+            <div class="logo-section">
+                <h1>📍 WFH Tracker</h1>
+                <p class="tagline">Create your account</p>
+            </div>
+            
+            <div class="login-form">
+                <h2>Sign Up</h2>
+                <div class="input-group">
+                    <input type="text" id="fullNameInput" placeholder="Full Name">
+                </div>
+                <div class="input-group">
+                    <input type="email" id="emailInput" placeholder="Organization Email ID">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="passwordInput" placeholder="Password" autocomplete="new-password">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="confirmPasswordInput" placeholder="Confirm Password" autocomplete="new-password">
+                </div>
+                <button id="signupBtn" class="primary-btn">Sign Up</button>
+                
+                <div class="signup-link">
+                    <p>Already have an account? <a href="login.html">Login</a></p>
+                </div>
+            </div>
+            
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+    
+    <script src="signup.js"></script>
+</body>
+</html>

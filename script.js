@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const sessionData = JSON.parse(session);
-    currentUser = sessionData.username;
+    currentUser = sessionData.email;
     
     // Update header with user info
     document.getElementById('userDisplay').textContent = sessionData.fullName;
@@ -262,19 +262,19 @@ function renderTeamView() {
     const usersDb = localStorage.getItem('wfh_users');
     const allUsers = usersDb ? JSON.parse(usersDb) : {};
     
-    Object.keys(allUsers).sort().forEach(username => {
+    Object.keys(allUsers).sort().forEach(email => {
         const member = document.createElement('div');
         member.className = 'team-member';
         
         const name = document.createElement('div');
         name.className = 'team-member-name';
-        name.textContent = allUsers[username].fullName;
+        name.textContent = allUsers[email].fullName;
         
         const status = document.createElement('div');
         status.className = 'team-member-status';
         
         const todayYear = today.getFullYear();
-        const todayStatus = userData[username]?.[todayYear]?.[dateKey];
+        const todayStatus = userData[email]?.[todayYear]?.[dateKey];
         if (todayStatus) {
             status.innerHTML = `Today: <span class="status-badge ${todayStatus}">${todayStatus}</span>`;
         } else {
