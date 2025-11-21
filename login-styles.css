@@ -208,12 +208,12 @@ input[type="text"]:focus {
 }
 
 .forgot-password-link {
-    text-align: left;
+    text-align: right;
     margin-top: 8px;
 }
 
 .forgot-password-link a {
-    color: #93c5fd;
+    color: #e2e6eb;
     font-size: 13px;
     text-decoration: none;
     transition: all 0.3s ease;
@@ -221,7 +221,6 @@ input[type="text"]:focus {
 
 .forgot-password-link a:hover {
     color: #60a5fa;
-    text-decoration: underline;
 }
 
 .secondary-btn {
