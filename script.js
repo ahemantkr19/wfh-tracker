@@ -1,45 +1,62 @@
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
-let currentUser = localStorage.getItem('currentUser') || '';
+let selectedYear = new Date().getFullYear();
+let currentUser = '';
 let userData = {};
 
-const GITHUB_REPO = 'ahemantkr19/wfh-tracker'; // Your GitHub repo
+const GITHUB_REPO = 'ahemantkr19/wfh-tracker';
 const GITHUB_TOKEN = localStorage.getItem('github_token') || '';
 const DATA_FILE_PATH = 'team-data.json';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    if (currentUser) {
-        document.getElementById('username').value = currentUser;
+    // Check authentication
+    const session = sessionStorage.getItem('wfh_session');
+    if (!session) {
+        window.location.href = 'login.html';
+        return;
     }
+    
+    const sessionData = JSON.parse(session);
+    currentUser = sessionData.username;
+    
+    // Update header with user info
+    document.getElementById('userDisplay').textContent = sessionData.fullName;
+    
     loadData();
     renderCalendar();
+    updateYearDisplay();
     
-    document.getElementById('saveUser').addEventListener('click', saveUser);
+    // Event listeners
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
     document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+    document.getElementById('prevYear').addEventListener('click', () => changeYear(-1));
+    document.getElementById('nextYear').addEventListener('click', () => changeYear(1));
 });
 
-function saveUser() {
-    const username = document.getElementById('username').value.trim();
-    if (username) {
-        currentUser = username;
-        localStorage.setItem('currentUser', currentUser);
-        loadData();
-        alert(`Welcome, ${username}!`);
-    } else {
-        alert('Please enter your name');
-    }
+function handleLogout() {
+    sessionStorage.removeItem('wfh_session');
+    window.location.href = 'login.html';
+}
+
+function changeYear(delta) {
+    selectedYear += delta;
+    updateYearDisplay();
+    loadData();
+}
+
+function updateYearDisplay() {
+    document.getElementById('selectedYear').textContent = selectedYear;
 }
 
 async function loadData() {
-    // Try to load from GitHub first
+    // Load data for all years but display only selected year
     try {
         const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${DATA_FILE_PATH}?t=${Date.now()}`);
         if (response.ok) {
             const data = await response.json();
             userData = data;
-            // Also save to local storage as backup
             localStorage.setItem('workLocationData', JSON.stringify(userData));
         }
     } catch (error) {
@@ -47,6 +64,15 @@ async function loadData() {
         const stored = localStorage.getItem('workLocationData');
         userData = stored ? JSON.parse(stored) : {};
     }
+    
+    // Initialize user data structure if needed
+    if (!userData[currentUser]) {
+        userData[currentUser] = {};
+    }
+    if (!userData[currentUser][selectedYear]) {
+        userData[currentUser][selectedYear] = {};
+    }
+    
     renderCalendar();
     renderTeamView();
 }
@@ -166,10 +192,11 @@ function createDayElement(dayNumber, otherMonth = false, isToday = false) {
         day.classList.add('today');
     }
     
-    const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const dateKey = `${selectedYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
     
-    if (!otherMonth && currentUser && userData[currentUser] && userData[currentUser][dateKey]) {
-        const status = userData[currentUser][dateKey];
+    if (!otherMonth && currentUser && userData[currentUser] && 
+        userData[currentUser][selectedYear] && userData[currentUser][selectedYear][dateKey]) {
+        const status = userData[currentUser][selectedYear][dateKey];
         day.classList.add(status);
         
         const dateNum = document.createElement('div');
@@ -198,23 +225,25 @@ function createDayElement(dayNumber, otherMonth = false, isToday = false) {
 
 function selectStatus(dateKey, dayElement) {
     if (!currentUser) {
-        alert('Please set your name first!');
         return;
     }
     
     const statuses = ['office', 'remote', 'off', null];
-    const currentStatus = userData[currentUser]?.[dateKey];
+    const currentStatus = userData[currentUser]?.[selectedYear]?.[dateKey];
     const currentIndex = statuses.indexOf(currentStatus);
     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
     
     if (!userData[currentUser]) {
         userData[currentUser] = {};
     }
+    if (!userData[currentUser][selectedYear]) {
+        userData[currentUser][selectedYear] = {};
+    }
     
     if (nextStatus === null) {
-        delete userData[currentUser][dateKey];
+        delete userData[currentUser][selectedYear][dateKey];
     } else {
-        userData[currentUser][dateKey] = nextStatus;
+        userData[currentUser][selectedYear][dateKey] = nextStatus;
     }
     
     saveData();
@@ -226,20 +255,26 @@ function renderTeamView() {
     const teamList = document.getElementById('teamList');
     teamList.innerHTML = '';
     
-    const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+    const today = new Date();
+    const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
-    Object.keys(userData).sort().forEach(user => {
+    // Get list of users from user database
+    const usersDb = localStorage.getItem('wfh_users');
+    const allUsers = usersDb ? JSON.parse(usersDb) : {};
+    
+    Object.keys(allUsers).sort().forEach(username => {
         const member = document.createElement('div');
         member.className = 'team-member';
         
         const name = document.createElement('div');
         name.className = 'team-member-name';
-        name.textContent = user;
+        name.textContent = allUsers[username].fullName;
         
         const status = document.createElement('div');
         status.className = 'team-member-status';
         
-        const todayStatus = userData[user][dateKey];
+        const todayYear = today.getFullYear();
+        const todayStatus = userData[username]?.[todayYear]?.[dateKey];
         if (todayStatus) {
             status.innerHTML = `Today: <span class="status-badge ${todayStatus}">${todayStatus}</span>`;
         } else {
@@ -251,7 +286,7 @@ function renderTeamView() {
         teamList.appendChild(member);
     });
     
-    if (Object.keys(userData).length === 0) {
+    if (Object.keys(allUsers).length === 0) {
         teamList.innerHTML = '<p style="text-align: center; color: #999;">No team members yet</p>';
     }
 }
