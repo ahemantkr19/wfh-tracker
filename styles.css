@@ -180,10 +180,11 @@ header h1 {
 
 .save-btn {
     padding: 14px 40px;
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.15);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: #93c5fd;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.4);
     border-radius: 14px;
     cursor: pointer;
     font-size: 16px;
@@ -193,8 +194,8 @@ header h1 {
 }
 
 .save-btn:hover {
-    background: rgba(59, 130, 246, 0.3);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.25);
+    border-color: rgba(59, 130, 246, 0.6);
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
 }

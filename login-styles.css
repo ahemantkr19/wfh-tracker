@@ -91,9 +91,10 @@ input[type="password"],
 input[type="text"] {
     width: 100%;
     padding: 16px 20px;
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
     font-size: 15px;
     transition: all 0.3s ease;
@@ -111,17 +112,18 @@ input[type="password"]:focus,
 input[type="text"]:focus {
     outline: none;
     border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
 }
 
 .primary-btn {
     width: 100%;
     padding: 16px;
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.15);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: #93c5fd;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.4);
     border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
@@ -133,7 +135,7 @@ input[type="text"]:focus {
 
 .primary-btn:hover {
     transform: translateY(-2px);
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.25);
     border-color: rgba(59, 130, 246, 0.5);
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
