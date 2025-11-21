@@ -208,12 +208,24 @@ function createDayElement(dayNumber, otherMonth = false, isToday = false) {
         statusText.textContent = status;
         
         day.appendChild(dateNum);
+        if (isToday && !otherMonth) {
+            const todayLabel = document.createElement('div');
+            todayLabel.className = 'today-label';
+            todayLabel.textContent = 'Today';
+            day.appendChild(todayLabel);
+        }
         day.appendChild(statusText);
     } else {
         const dateNum = document.createElement('div');
         dateNum.className = 'date-number';
         dateNum.textContent = dayNumber;
         day.appendChild(dateNum);
+        if (isToday && !otherMonth) {
+            const todayLabel = document.createElement('div');
+            todayLabel.className = 'today-label';
+            todayLabel.textContent = 'Today';
+            day.appendChild(todayLabel);
+        }
     }
     
     if (!otherMonth) {
