@@ -3,7 +3,9 @@ let currentYear = new Date().getFullYear();
 let currentUser = localStorage.getItem('currentUser') || '';
 let userData = {};
 
-const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+const GITHUB_REPO = 'ahemantkr19/wfh-tracker'; // Your GitHub repo
+const GITHUB_TOKEN = localStorage.getItem('github_token') || '';
+const DATA_FILE_PATH = 'team-data.json';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -31,13 +33,17 @@ function saveUser() {
 }
 
 async function loadData() {
+    // Try to load from GitHub first
     try {
-        const response = await fetch(`${API_URL}/api/data`);
+        const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${DATA_FILE_PATH}?t=${Date.now()}`);
         if (response.ok) {
-            userData = await response.json();
+            const data = await response.json();
+            userData = data;
+            // Also save to local storage as backup
+            localStorage.setItem('workLocationData', JSON.stringify(userData));
         }
     } catch (error) {
-        console.log('Using local storage fallback');
+        console.log('Loading from local storage');
         const stored = localStorage.getItem('workLocationData');
         userData = stored ? JSON.parse(stored) : {};
     }
@@ -46,15 +52,44 @@ async function loadData() {
 }
 
 async function saveData() {
-    try {
-        await fetch(`${API_URL}/api/data`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        });
-    } catch (error) {
-        console.log('Saving to local storage');
-        localStorage.setItem('workLocationData', JSON.stringify(userData));
+    // Save to local storage immediately
+    localStorage.setItem('workLocationData', JSON.stringify(userData));
+    
+    // Try to sync with GitHub (requires token)
+    if (GITHUB_TOKEN) {
+        try {
+            // Get current file SHA
+            const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            let sha = '';
+            if (getResponse.ok) {
+                const fileData = await getResponse.json();
+                sha = fileData.sha;
+            }
+            
+            // Update or create file
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(userData, null, 2))));
+            await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Update team data - ${new Date().toISOString()}`,
+                    content: content,
+                    sha: sha
+                })
+            });
+        } catch (error) {
+            console.log('GitHub sync failed, data saved locally');
+        }
     }
 }
 
