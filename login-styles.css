@@ -207,6 +207,50 @@ input[type="text"]:focus {
     backdrop-filter: blur(10px);
 }
 
+.forgot-password-link {
+    text-align: left;
+    margin-top: 8px;
+}
+
+.forgot-password-link a {
+    color: #93c5fd;
+    font-size: 13px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.forgot-password-link a:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+}
+
+.secondary-btn {
+    width: 100%;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #9ca3af;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.secondary-btn:active {
+    transform: translateY(0);
+}
+
 @media (max-width: 480px) {
     .login-card {
         padding: 40px 25px;
