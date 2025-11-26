@@ -17,7 +17,7 @@ async function sendOTP() {
     }
     
     // Check if user exists
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('wfh_users') || '{}');
     if (!users[email]) {
         showMessage('Email address not found', 'error');
         return;

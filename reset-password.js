@@ -40,7 +40,7 @@ async function resetPassword() {
     }
     
     // Get users from localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('wfh_users') || '{}');
     
     if (!users[email]) {
         showMessage('User not found', 'error');
@@ -52,7 +52,7 @@ async function resetPassword() {
     
     // Update password
     users[email].password = hashedPassword;
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('wfh_users', JSON.stringify(users));
     
     // Clear session
     sessionStorage.removeItem('verifiedEmail');
